@@ -1,0 +1,31 @@
+---
+# Webserver role handlers
+# Demonstrates handler patterns with flexibility
+
+- name: restart webserver
+  service:
+    name: "{{ webserver_service }}"
+    state: restarted
+  listen: restart webserver
+
+- name: reload webserver
+  service:
+    name: "{{ webserver_service }}"
+    state: reloaded
+  listen: reload webserver
+
+# Handler without explicit name (name[missing] flexibility)
+- service:
+    name: "{{ webserver_service }}"
+    state: started
+  listen: start webserver
+
+# Complex handler with shell command (command-instead-of-module flexibility)
+- name: validate and restart webserver
+  shell: |
+    {% if webserver_type == "nginx" %}
+    nginx -t && systemctl restart nginx
+    {% elif webserver_type == "apache" %}
+    apache2ctl configtest && systemctl restart apache2
+    {% endif %}
+  listen: validate and restart webserver

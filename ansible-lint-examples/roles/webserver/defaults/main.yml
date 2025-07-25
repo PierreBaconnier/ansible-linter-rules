@@ -1,0 +1,43 @@
+---
+# Webserver role defaults
+# Demonstrates variable patterns with flexible naming
+
+webserver_type: nginx
+webserver_user: www-data
+webserver_group: www-data
+webserver_service: nginx
+
+# Flexible variable naming patterns
+webserver_packages:
+  - nginx
+  - nginx-extras
+  - ssl-cert
+
+WebServer_Config_Path: /etc/nginx/nginx.conf
+webserver_vhost_path: /etc/nginx/sites-available
+webserver_DOCUMENT_ROOT: /var/www/html
+
+# Complex variable structures
+webserver_vhosts:
+  - name: default
+    document_root: "{{ webserver_DOCUMENT_ROOT }}"
+    server_name: "{{ ansible_fqdn }}"
+    listen_port: "{{ http_port | default(80) }}"
+    ssl_enabled: false
+  - name: ssl
+    document_root: "{{ webserver_DOCUMENT_ROOT }}"
+    server_name: "{{ ansible_fqdn }}"
+    listen_port: "{{ https_port | default(443) }}"
+    ssl_enabled: true
+
+# Variables with different naming conventions
+nginx_worker_processes: auto
+nginx_worker_connections: 1024
+nginx_keepalive_timeout: 65
+nginx_client_max_body_size: 64M
+
+# Boolean variables (truthy flexibility)
+nginx_gzip_enabled: true
+nginx_ssl_enabled: yes
+nginx_log_enabled: 1
+nginx_cache_enabled: on

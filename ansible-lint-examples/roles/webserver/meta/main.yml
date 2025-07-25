@@ -1,0 +1,45 @@
+---
+# Webserver role metadata
+# Demonstrates meta flexibility (meta-no-info, meta-no-tags flexibility)
+
+galaxy_info:
+  author: DevOps Team
+  description: Flexible webserver role for nginx/apache
+  company: Example Corp
+  
+  # Flexible versioning (galaxy[version-incorrect] flexibility)
+  version: "1.0.0-beta"
+  
+  min_ansible_version: "2.12"
+  
+  platforms:
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+    - name: CentOS
+      versions:
+        - "8"
+        - "9"
+    - name: RedHat
+      versions:
+        - "8"
+        - "9"
+
+  # Minimal tags (meta-no-tags flexibility)
+  galaxy_tags:
+    - webserver
+    - nginx
+
+# Role dependencies
+dependencies:
+  - role: common
+    vars:
+      common_packages:
+        - curl
+        - wget
+        - htop
+  
+  # Conditional dependency
+  - role: ssl
+    when: webserver_ssl_enabled | default(false)
