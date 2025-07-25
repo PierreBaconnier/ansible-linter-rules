@@ -1,0 +1,85 @@
+---
+# Host-specific variables for web1.example.com
+# Demonstrates host-specific overrides and flexible patterns
+
+# Basic host information
+ansible_host: 192.168.1.10
+ansible_user: ansible
+
+# Host-specific overrides
+nginx_worker_processes: 4  # Override based on host capacity
+nginx_worker_connections: 4096  # Higher capacity for primary web server
+
+# Flexible variable naming (var-naming flexibility)
+HOST_ROLE: primary
+host_Priority: 1
+Host_Backup_Enabled: true
+
+# Custom configuration for this host
+custom_config:
+  is_primary: true
+  backup_priority: high
+  monitoring_level: detailed
+  
+# SSL configuration specific to this host
+ssl_config:
+  enabled: true
+  certificate_path: /etc/ssl/certs/web1.example.com.crt
+  private_key_path: /etc/ssl/private/web1.example.com.key
+  
+# Additional virtual hosts for this server
+additional_vhosts:
+  - name: api
+    server_name: api.example.com
+    document_root: /var/www/api
+    listen_port: 80
+    proxy_pass: http://127.0.0.1:8000
+    
+  - name: admin
+    server_name: admin.example.com
+    document_root: /var/www/admin
+    listen_port: 443
+    ssl_enabled: true
+    access_restrictions:
+      - "allow 192.168.1.0/24"
+      - "deny all"
+
+# Performance tuning specific to this host
+performance_config:
+  max_connections: 1000
+  timeout: 30
+  buffer_size: 8k
+  gzip_compression: 9
+
+# Backup configuration
+backup_config:
+  enabled: true
+  schedule: "0 1 * * *"  # Daily at 1 AM
+  retention: 14  # Keep backups for 14 days
+  destinations:
+    - /backup/web1
+    - rsync://backup.example.com/web1/
+    - s3://company-backups/web1/
+
+# Monitoring configuration
+monitoring_config:
+  enabled: true
+  metrics_port: 9100
+  custom_metrics:
+    - nginx_requests_per_second
+    - nginx_active_connections
+    - disk_usage_percent
+    - memory_usage_percent
+    
+# Complex conditional configuration (jinja[invalid] flexibility)
+firewall_rules: |
+  {% if HOST_ROLE == 'primary' %}
+  # Primary server rules
+  -A INPUT -p tcp --dport 80 -j ACCEPT
+  -A INPUT -p tcp --dport 443 -j ACCEPT
+  -A INPUT -p tcp --dport 22 -j ACCEPT
+  {% endif %}
+  {% if Host_Backup_Enabled %}
+  # Backup server access
+  -A INPUT -s 192.168.1.100 -p tcp --dport 873 -j ACCEPT
+  {% endif %}

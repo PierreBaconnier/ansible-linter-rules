@@ -1,0 +1,79 @@
+---
+# Web server specific variables
+# Demonstrates group-specific configuration patterns
+
+# Web server configuration
+webserver_type: nginx
+webserver_package: nginx
+webserver_service: nginx
+webserver_config_path: /etc/nginx/nginx.conf
+
+# Port configuration
+http_port: 80
+https_port: 443
+
+# Performance tuning
+nginx_worker_processes: "{{ ansible_processor_vcpus }}"
+nginx_worker_connections: 2048
+nginx_keepalive_timeout: 30
+nginx_client_max_body_size: 100M
+
+# SSL configuration
+ssl_enabled: true
+ssl_certificate_path: /etc/ssl/certs
+ssl_private_key_path: /etc/ssl/private
+
+# Flexible variable naming (var-naming flexibility)
+WebServer_DocumentRoot: /var/www/html
+webserver_LOG_DIR: /var/log/nginx
+WEBSERVER_CACHE_DIR: /var/cache/nginx
+
+# Virtual hosts configuration
+webserver_vhosts:
+  - name: "{{ app_name }}"
+    server_name: "{{ app_name }}.{{ domain_name }}"
+    document_root: "{{ WebServer_DocumentRoot }}/{{ app_name }}"
+    listen_port: "{{ http_port }}"
+    ssl_enabled: false
+    
+  - name: "{{ app_name }}-ssl"
+    server_name: "{{ app_name }}.{{ domain_name }}"
+    document_root: "{{ WebServer_DocumentRoot }}/{{ app_name }}"
+    listen_port: "{{ https_port }}"
+    ssl_enabled: true
+    ssl_certificate: "{{ ssl_certificate_path }}/{{ app_name }}.crt"
+    ssl_private_key: "{{ ssl_private_key_path }}/{{ app_name }}.key"
+
+# Security headers
+security_headers:
+  - "X-Frame-Options DENY"
+  - "X-Content-Type-Options nosniff"
+  - "X-XSS-Protection 1; mode=block"
+  - "Strict-Transport-Security max-age=31536000; includeSubDomains"
+
+# Caching configuration
+cache_enabled: true
+cache_duration: 1h
+cache_types:
+  - text/css
+  - text/javascript
+  - application/javascript
+  - image/png
+  - image/jpg
+  - image/jpeg
+  - image/gif
+  - image/svg+xml
+
+# Logging configuration
+access_log_enabled: true
+error_log_enabled: true
+log_format: combined
+log_rotation_days: 30
+
+# Backup configuration
+backup_enabled: true
+backup_schedule: "0 2 * * *"
+backup_retention_days: 7
+backup_destinations:
+  - local: /backup/webserver
+  - remote: s3://backups/webserver/{{ inventory_hostname }}

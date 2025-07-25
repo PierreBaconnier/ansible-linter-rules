@@ -1,0 +1,87 @@
+---
+# Global variables for all hosts
+# Demonstrates variable patterns with flexible naming and structure
+
+# Basic configuration
+ansible_user: ansible
+ansible_become: true
+ansible_become_method: sudo
+
+# Network configuration
+domain_name: example.com
+ntp_servers:
+  - 0.pool.ntp.org
+  - 1.pool.ntp.org
+  - 2.pool.ntp.org
+
+# Security settings
+firewall_enabled: true
+ssh_port: 22
+allowed_ssh_users:
+  - ansible
+  - admin
+  - deploy
+
+# Application settings
+app_name: myapp
+app_version: "{{ lookup('env', 'APP_VERSION') | default('latest') }}"
+app_environment: "{{ environment | default('production') }}"
+
+# Database configuration
+database_type: mysql
+database_host: "{{ groups['dbservers'][0] if groups['dbservers'] is defined else 'localhost' }}"
+database_port: 3306
+database_name: "{{ app_name }}_{{ app_environment }}"
+
+# Flexible variable naming patterns (var-naming flexibility)
+system_packages:
+  - vim
+  - htop
+  - curl
+  - wget
+  - unzip
+  - git
+
+System_Timezone: "UTC"
+SYSTEM_LOCALE: "en_US.UTF-8"
+
+# Complex variable structures
+monitoring_config:
+  enabled: true
+  metrics_port: 9090
+  alerting:
+    email: admin@example.com
+    slack_webhook: "{{ vault_slack_webhook | default('') }}"
+  retention_days: 30
+
+# Boolean variables with different formats (truthy flexibility)
+backup_enabled: true
+logging_enabled: yes
+debug_mode: false
+maintenance_mode: off
+
+# Template variables with complex Jinja2 (jinja[invalid] flexibility)
+service_discovery_config: |
+  {% for host in groups['all'] %}
+  {% if hostvars[host]['ansible_default_ipv4'] is defined %}
+  {{ hostvars[host]['inventory_hostname'] }}: {{ hostvars[host]['ansible_default_ipv4']['address'] }}
+  {% endif %}
+  {% endfor %}
+
+# Long variable values (yaml[line-length] flexibility)
+long_configuration_string: "This is a very long configuration string that would normally trigger the yaml line-length rule but is necessary for complex configurations"
+
+# Environment-specific overrides
+environment_config:
+  production:
+    debug: false
+    log_level: INFO
+    cache_enabled: true
+  staging:
+    debug: true
+    log_level: DEBUG
+    cache_enabled: false
+  development:
+    debug: true
+    log_level: DEBUG
+    cache_enabled: false
