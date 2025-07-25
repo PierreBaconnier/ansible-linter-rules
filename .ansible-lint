@@ -115,20 +115,11 @@ offline: false
 # Set verbosity level (0-2)
 verbosity: 1
 
-# Show relative paths
-display_relative_path: true
-
 # Generate parseable output
 parseable: false
 
 # Treat warnings as errors
 strict: false
-
-# Enable progressive mode for large codebases
-progressive: false
-
-# Write lint results to file
-write_list: []
 
 # ==============================================================================
 # CUSTOM RULES DIRECTORY
@@ -139,19 +130,6 @@ rulesdir:
   - ./.ansible-lint-rules/
 
 # ==============================================================================
-# MOCK CONFIGURATION
-# ==============================================================================
-
-# Mock modules for testing
-mock_modules:
-  - win_updates
-  - win_chocolatey
-
-# Mock roles for testing
-mock_roles:
-  - mocked_role
-
-# ==============================================================================
 # PROFILE CONFIGURATION
 # ==============================================================================
 
@@ -159,36 +137,18 @@ mock_roles:
 profile: production
 
 # ==============================================================================
-# LOOP CONFIGURATION
+# OPTIONAL: ENABLE EXPERIMENTAL RULES
 # ==============================================================================
 
-# Allow certain loop patterns
-loop_var_prefix: "^(__|{{"
+# Enable experimental rules (uncomment if needed)
+# enable_list:
+#   - experimental
 
 # ==============================================================================
-# TASK CONFIGURATION
+# OPTIONAL: WARNINGS INSTEAD OF ERRORS
 # ==============================================================================
 
-# Task naming requirements
-task_name_prefix: []
-
-# ==============================================================================
-# VARIABLE CONFIGURATION
-# ==============================================================================
-
-# Variable naming patterns
-var_naming_pattern: "^[a-z_][a-z0-9_]*$"
-
-# ==============================================================================
-# SARIF OUTPUT CONFIGURATION
-# ==============================================================================
-
-# Enable SARIF output for CI/CD integration
-sarif_file: null
-
-# ==============================================================================
-# CUSTOM CONFIGURATION
-# ==============================================================================
-
-# Additional custom configuration can be added here
-# These settings can be overridden in project-specific configurations
+# Convert some rules to warnings instead of errors (uncomment if needed)
+# warn_list:
+#   - yaml[document-start]
+#   - yaml[document-end]
