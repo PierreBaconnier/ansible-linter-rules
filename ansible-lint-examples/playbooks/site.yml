@@ -1,0 +1,145 @@
+---
+# Main site deployment playbook
+# This demonstrates various patterns that would trigger ansible-lint rules
+# but are acceptable in real-world scenarios
+
+- name: Deploy Web Infrastructure
+  hosts: webservers
+  become: yes
+  vars:
+    # Variable naming that might trigger var-naming rule
+    nginx_config_file: /etc/nginx/nginx.conf
+    app_version: "{{ lookup('env', 'APP_VERSION') | default('latest') }}"
+    
+  tasks:
+    - name: Install packages
+      package:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - nginx
+        - python3
+        - git
+    
+    # This would trigger command-instead-of-module but is legitimate
+    - name: Check if application is running
+      shell: |
+        ps aux | grep -v grep | grep -q "{{ app_name }}" && echo "running" || echo "stopped"
+      register: app_status
+      changed_when: false
+      failed_when: false
+    
+    # Long line that would trigger yaml[line-length]
+    - name: Configure nginx with very long configuration line that exceeds the typical line length limit
+      template:
+        src: nginx.conf.j2
+        dest: "{{ nginx_config_file }}"
+        backup: yes
+      notify: restart nginx
+    
+    # Multiple tasks without explicit changed_when (would trigger no-changed-when)
+    - name: Create application directory
+      file:
+        path: /opt/myapp
+        state: directory
+        mode: '0755'
+    
+    - name: Download application code
+      git:
+        repo: "https://github.com/example/myapp.git"
+        dest: /opt/myapp
+        version: "{{ app_version }}"
+    
+    # Using shell with pipe (would trigger risky-shell-pipe)
+    - name: Get system information
+      shell: |
+        cat /proc/cpuinfo | grep "model name" | head -1 | cut -d: -f2
+      register: cpu_info
+      changed_when: false
+    
+    # Task without name (would trigger name[missing] in some contexts)
+    - debug:
+        msg: "CPU: {{ cpu_info.stdout }}"
+  
+  handlers:
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted
+
+- name: Configure Database Servers
+  hosts: dbservers
+  become: yes
+  vars:
+    mysql_root_password: "{{ vault_mysql_root_password }}"
+    
+  tasks:
+    - name: Install MySQL
+      package:
+        name: mysql-server
+        state: present
+    
+    # Using ignore_errors (would trigger ignore-errors rule)
+    - name: Set MySQL root password
+      mysql_user:
+        name: root
+        password: "{{ mysql_root_password }}"
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+      ignore_errors: yes
+    
+    # Complex Jinja2 that might trigger jinja[invalid]
+    - name: Create database configuration
+      template:
+        src: my.cnf.j2
+        dest: /etc/mysql/my.cnf
+        content: |
+          [mysql]
+          max_connections = {{ mysql_max_connections | default(100) }}
+          {% if inventory_hostname in groups['dbservers'][0] %}
+          server-id = 1
+          {% else %}
+          server-id = {{ groups['dbservers'].index(inventory_hostname) + 1 }}
+          {% endif %}
+      notify: restart mysql
+  
+  handlers:
+    - name: restart mysql
+      service:
+        name: mysql
+        state: restarted
+
+- name: Load Balancer Configuration
+  hosts: loadbalancers
+  become: yes
+  
+  tasks:
+    # Using latest package (would trigger package-latest)
+    - name: Install HAProxy
+      package:
+        name: haproxy
+        state: latest
+    
+    # Flexible file permissions (would trigger risky-file-permissions)
+    - name: Configure HAProxy
+      template:
+        src: haproxy.cfg.j2
+        dest: /etc/haproxy/haproxy.cfg
+        mode: '0644'
+        owner: root
+        group: root
+      notify: restart haproxy
+    
+    # Command with complex logic (legitimate use of shell)
+    - name: Verify load balancer configuration
+      shell: |
+        haproxy -f /etc/haproxy/haproxy.cfg -c && \
+        echo "Configuration valid" || \
+        (echo "Configuration invalid" && exit 1)
+      register: config_check
+      changed_when: false
+  
+  handlers:
+    - name: restart haproxy
+      service:
+        name: haproxy
+        state: restarted
