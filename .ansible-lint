@@ -115,9 +115,6 @@ offline: false
 # Set verbosity level (0-2)
 verbosity: 1
 
-# Use colored output
-colored: true
-
 # Show relative paths
 display_relative_path: true
 
@@ -142,21 +139,8 @@ rulesdir:
   - ./.ansible-lint-rules/
 
 # ==============================================================================
-# TAGS TO SKIP
+# MOCK CONFIGURATION
 # ==============================================================================
-
-# Skip specific tags that might be applied to rules
-skip_tags:
-  - experimental              # Skip experimental rules
-  - opt-in                   # Skip opt-in rules
-  - formatting               # Skip formatting rules (handled by prettier/other tools)
-
-# ==============================================================================
-# ANSIBLE CONFIGURATION
-# ==============================================================================
-
-# Specify which Ansible version to use for linting
-ansible_version: ">=2.12"
 
 # Mock modules for testing
 mock_modules:
@@ -173,13 +157,6 @@ mock_roles:
 
 # Use specific profile for consistent linting
 profile: production
-
-# ==============================================================================
-# FORMAT CONFIGURATION
-# ==============================================================================
-
-# Specify output format
-format: auto
 
 # ==============================================================================
 # LOOP CONFIGURATION
