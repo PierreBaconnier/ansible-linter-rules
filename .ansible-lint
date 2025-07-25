@@ -1,0 +1,217 @@
+# State-of-the-Art Ansible Lint Exclusion Ruleset
+# Optimized for ansible-core and production environments
+# Last updated: March 2025
+
+# ==============================================================================
+# RULE EXCLUSIONS - CATEGORIZED BY PURPOSE
+# ==============================================================================
+
+# Skip specific rules that are commonly excluded in production environments
+skip_list:
+  # SYNTAX & FORMATTING FLEXIBILITY
+  - 'yaml[line-length]'          # Allow longer lines for readability in complex scenarios
+  - 'yaml[indentation]'          # Allow flexible indentation for nested structures
+  - 'yaml[brackets]'             # Allow brackets in YAML when needed for clarity
+  - 'yaml[comments]'             # Allow comments that might not follow strict formatting
+  - 'yaml[empty-lines]'          # Allow empty lines for better readability
+  - 'yaml[trailing-spaces]'      # Allow trailing spaces (often auto-generated)
+  
+  # COMMAND & MODULE FLEXIBILITY
+  - 'command-instead-of-module'  # Allow command/shell when modules aren't suitable
+  - 'risky-shell-pipe'          # Allow shell pipes when properly handled
+  - 'risky-file-permissions'    # Allow flexible file permissions for specific use cases
+  - 'no-changed-when'           # Allow tasks without changed_when for certain scenarios
+  - 'no-free-form'              # Allow free-form commands when appropriate
+  
+  # VARIABLE & TEMPLATING
+  - 'var-naming'                # Allow flexible variable naming conventions
+  - 'jinja[spacing]'            # Allow flexible Jinja2 spacing
+  - 'jinja[invalid]'            # Allow complex Jinja2 expressions
+  - 'template-instead-of-copy'  # Allow copy when template isn't needed
+  
+  # TASK & PLAY STRUCTURE
+  - 'name[play]'                # Allow flexible play naming
+  - 'name[task]'                # Allow flexible task naming
+  - 'name[missing]'             # Allow tasks without names in specific contexts
+  - 'name[template]'            # Allow template-based naming
+  - 'name[casing]'              # Allow flexible casing in names
+  
+  # LOOP & CONDITIONAL FLEXIBILITY
+  - 'loop-var-prefix'           # Allow flexible loop variable naming
+  - 'deprecated-bare-vars'      # Allow bare variables in legacy code
+  - 'no-jinja-when'             # Allow Jinja2 in when conditions
+  
+  # HANDLER & NOTIFICATION
+  - 'no-handler'                # Allow tasks without handlers when appropriate
+  - 'handler-depends-on'        # Allow handler dependencies
+  
+  # ROLE & COLLECTION STRUCTURE
+  - 'role-name'                 # Allow flexible role naming
+  - 'galaxy[no-changelog]'      # Allow roles without changelogs
+  - 'galaxy[version-incorrect]' # Allow flexible versioning
+  - 'meta-no-info'              # Allow meta without complete info
+  - 'meta-no-tags'              # Allow meta without tags
+  
+  # SECURITY & PERMISSIONS (USE WITH CAUTION)
+  - 'risky-octal'               # Allow octal permissions when properly documented
+  - 'avoid-implicit'            # Allow implicit operations when safe
+  
+  # PERFORMANCE & EFFICIENCY
+  - 'package-latest'            # Allow latest packages in development environments
+  - 'ignore-errors'             # Allow ignore_errors when properly handled
+  
+  # LEGACY & COMPATIBILITY
+  - 'deprecated-module'         # Allow deprecated modules during transitions
+  - 'deprecated-command-syntax' # Allow deprecated syntax during migrations
+  
+  # DEVELOPMENT & TESTING
+  - 'literal-compare'           # Allow literal comparisons in tests
+  - 'truthy'                    # Allow truthy values in development
+  - 'empty-string-compare'      # Allow empty string comparisons
+
+# ==============================================================================
+# EXCLUSION PATHS
+# ==============================================================================
+
+# Exclude paths that don't need linting or are auto-generated
+exclude_paths:
+  - .cache/                     # Cache directories
+  - .github/                    # GitHub workflows (different linting rules)
+  - .gitlab-ci/                 # GitLab CI (different linting rules)
+  - .tox/                       # Tox testing environment
+  - .venv/                      # Virtual environments
+  - venv/                       # Virtual environments
+  - env/                        # Environment directories
+  - build/                      # Build artifacts
+  - dist/                       # Distribution artifacts
+  - '*.retry'                   # Ansible retry files
+  - '*.log'                     # Log files
+  - '*.tmp'                     # Temporary files
+  - 'tmp/'                      # Temporary directories
+  - 'temp/'                     # Temporary directories
+  - 'node_modules/'             # Node.js modules
+  - 'vendor/'                   # Vendor directories
+  - 'third_party/'              # Third-party code
+  - 'legacy/'                   # Legacy code that will be refactored
+  - 'archived/'                 # Archived code
+  - 'backup/'                   # Backup files
+  - 'docs/'                     # Documentation might have example code
+  - 'examples/'                 # Example code might not follow all rules
+  - 'tests/fixtures/'           # Test fixtures
+  - 'molecule/*/molecule.yml'   # Molecule configuration
+  - 'vagrant/'                  # Vagrant files
+  - 'docker/'                   # Docker files (different linting)
+  - 'kubernetes/'               # Kubernetes files (different linting)
+  - 'helm/'                     # Helm charts (different linting)
+  - 'terraform/'                # Terraform files (different linting)
+
+# ==============================================================================
+# CONFIGURATION OPTIONS
+# ==============================================================================
+
+# Enable offline mode for air-gapped environments
+offline: false
+
+# Set verbosity level (0-2)
+verbosity: 1
+
+# Use colored output
+colored: true
+
+# Show relative paths
+display_relative_path: true
+
+# Generate parseable output
+parseable: false
+
+# Treat warnings as errors
+strict: false
+
+# Enable progressive mode for large codebases
+progressive: false
+
+# Write lint results to file
+write_list: []
+
+# ==============================================================================
+# CUSTOM RULES DIRECTORY
+# ==============================================================================
+
+# Directory for custom rules (if needed)
+rulesdir:
+  - ./.ansible-lint-rules/
+
+# ==============================================================================
+# TAGS TO SKIP
+# ==============================================================================
+
+# Skip specific tags that might be applied to rules
+skip_tags:
+  - experimental              # Skip experimental rules
+  - opt-in                   # Skip opt-in rules
+  - formatting               # Skip formatting rules (handled by prettier/other tools)
+
+# ==============================================================================
+# ANSIBLE CONFIGURATION
+# ==============================================================================
+
+# Specify which Ansible version to use for linting
+ansible_version: ">=2.12"
+
+# Mock modules for testing
+mock_modules:
+  - win_updates
+  - win_chocolatey
+
+# Mock roles for testing
+mock_roles:
+  - mocked_role
+
+# ==============================================================================
+# PROFILE CONFIGURATION
+# ==============================================================================
+
+# Use specific profile for consistent linting
+profile: production
+
+# ==============================================================================
+# FORMAT CONFIGURATION
+# ==============================================================================
+
+# Specify output format
+format: auto
+
+# ==============================================================================
+# LOOP CONFIGURATION
+# ==============================================================================
+
+# Allow certain loop patterns
+loop_var_prefix: "^(__|{{"
+
+# ==============================================================================
+# TASK CONFIGURATION
+# ==============================================================================
+
+# Task naming requirements
+task_name_prefix: []
+
+# ==============================================================================
+# VARIABLE CONFIGURATION
+# ==============================================================================
+
+# Variable naming patterns
+var_naming_pattern: "^[a-z_][a-z0-9_]*$"
+
+# ==============================================================================
+# SARIF OUTPUT CONFIGURATION
+# ==============================================================================
+
+# Enable SARIF output for CI/CD integration
+sarif_file: null
+
+# ==============================================================================
+# CUSTOM CONFIGURATION
+# ==============================================================================
+
+# Additional custom configuration can be added here
+# These settings can be overridden in project-specific configurations
